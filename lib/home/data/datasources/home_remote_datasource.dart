@@ -16,7 +16,7 @@ class MockHomeRemoteDataSourceImpl implements HomeRemoteDataSource {
             id: index,
             name: '$bookName $index',
             author: 'Author $index',
-            coverImage: 'https://picsum.photos/200/300',
+            coverImage: 'https://picsum.photos/300/300',
             publishedDate: DateTime.now(),
           ),
         ),
@@ -30,7 +30,7 @@ class MockHomeRemoteDataSourceImpl implements HomeRemoteDataSource {
         id: index,
         name: 'Book $index',
         author: 'Author $index',
-        coverImage: 'https://picsum.photos/200/300',
+        coverImage: 'https://picsum.photos/300/300',
         publishedDate: DateTime.now(),
       ),
     );

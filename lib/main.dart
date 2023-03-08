@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:storyways/home/presentation/pages/home_page.dart';
+import 'package:storyways/style/theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,9 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Storyways',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: theme,
       home: const HomePage(),
     );
   }
