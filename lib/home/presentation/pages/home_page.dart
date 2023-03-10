@@ -270,53 +270,46 @@ class _NewBookItem extends StatelessWidget {
   }
 }
 
-class _SearchAppBar extends StatelessWidget {
-  const _SearchAppBar({
-    super.key,
-  });
+class _SearchAppBar extends StatefulWidget {
+  const _SearchAppBar({super.key});
+
+  @override
+  State<_SearchAppBar> createState() => _SearchAppBarState();
+}
+
+class _SearchAppBarState extends State<_SearchAppBar> {
+  OverlayEntry? overlayEntry;
 
   @override
   Widget build(BuildContext context) {
-    OverlayEntry? overlayEntry;
     final overlayState = Overlay.of(context);
     final size = MediaQuery.of(context).size;
     final homeBloc = context.read<HomeBloc>();
 
     return SizedBox(
       width: size.width - 16.0,
-      height: 50,
+      height: 60,
       child: TextField(
         onChanged: (text) {
           if (text.isNotEmpty == true && overlayEntry == null) {
-            overlayState.insert(overlayEntry ??= _createOverlayEntry(context));
+            overlayState.insert(overlayEntry ??=
+                _createOverlayEntry(context, screenHeight: size.height));
           } else if (text.isNotEmpty != true && overlayEntry != null) {
-            overlayEntry?.remove();
-            overlayEntry = null;
+            _closeOverlay();
           }
           homeBloc.add(
             HomeEvent(status: HomeEventStatus.search, searchText: text),
           );
         },
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           hintText: 'Search for something',
-          hintStyle: const TextStyle(color: Colors.grey),
+          hintStyle: TextStyle(color: Colors.grey),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.only(left: 15.0, top: 15.0),
-          suffixIcon: const Icon(
+          contentPadding: EdgeInsets.only(left: 15.0, top: 15.0),
+          suffixIcon: Icon(
             Icons.search,
             color: Colors.grey,
             size: 30.0,
-          ),
-          prefixIcon: InkWell(
-            child: const Icon(
-              Icons.close,
-              color: Colors.grey,
-              size: 30.0,
-            ),
-            onTap: () {
-              overlayEntry?.remove();
-              overlayEntry = null;
-            },
           ),
         ),
         style: const TextStyle(color: Colors.black, fontSize: 16.0),
@@ -324,21 +317,44 @@ class _SearchAppBar extends StatelessWidget {
     );
   }
 
-  OverlayEntry _createOverlayEntry(BuildContext context) {
+  OverlayEntry _createOverlayEntry(
+    BuildContext context, {
+    required double screenHeight,
+  }) {
     return OverlayEntry(
       builder: (_) => BlocProvider.value(
         value: context.read<HomeBloc>(),
         child: Positioned(
-          top: 110,
+          top: 120,
           left: 0,
           right: 0,
-          child: Material(
-            elevation: 6.0,
-            child: _buildSearchResult(),
+          child: GestureDetector(
+            onTap: _closeOverlay,
+            child: SizedBox(
+              height: screenHeight - 120,
+              child: DecoratedBox(
+                decoration: const BoxDecoration(color: Colors.black12),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 300),
+                    child: Material(
+                      elevation: 6.0,
+                      child: _buildSearchResult(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
     );
+  }
+
+  void _closeOverlay() {
+    overlayEntry?.remove();
+    overlayEntry = null;
   }
 
   Widget _buildSearchResult() {
@@ -346,16 +362,13 @@ class _SearchAppBar extends StatelessWidget {
       selector: (state) => state.searchedBooks,
       builder: (_, books) {
         if (books?.isNotEmpty == true) {
-          return ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 300),
-            child: ListView.separated(
-              itemCount: books!.length,
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(16.0),
-              separatorBuilder: (_, index) => const Divider(thickness: 2.0),
-              itemBuilder: (_, index) =>
-                  _NewBookItem(book: books[index], hideNotificationIcon: true),
-            ),
+          return ListView.separated(
+            itemCount: books!.length,
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(16.0),
+            separatorBuilder: (_, index) => const Divider(thickness: 2.0),
+            itemBuilder: (_, index) =>
+                _NewBookItem(book: books[index], hideNotificationIcon: true),
           );
         }
         return const SizedBox();
