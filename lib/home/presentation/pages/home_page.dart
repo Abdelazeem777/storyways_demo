@@ -203,18 +203,21 @@ class _NewBookItem extends StatelessWidget {
   final bool hideNotificationIcon;
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: SizedBox(
-        width: 100,
-        child: Row(
-          children: [
-            if (book.coverImage?.isNotEmpty == true) _buildBookCoverImage(),
-            const SizedBox(width: 12.0),
-            Expanded(child: _buildBookInfo(context)),
-            const SizedBox(width: 12.0),
-            if (!hideNotificationIcon) _buildNotificationIcon(),
-          ],
+    return InkWell(
+      onTap: () => print('NewBookItem'),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: SizedBox(
+          width: 100,
+          child: Row(
+            children: [
+              if (book.coverImage?.isNotEmpty == true) _buildBookCoverImage(),
+              const SizedBox(width: 12.0),
+              Expanded(child: _buildBookInfo(context)),
+              const SizedBox(width: 12.0),
+              if (!hideNotificationIcon) _buildNotificationIcon(),
+            ],
+          ),
         ),
       ),
     );
