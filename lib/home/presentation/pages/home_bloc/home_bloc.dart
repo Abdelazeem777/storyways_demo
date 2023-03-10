@@ -67,7 +67,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     try {
       if (searchText?.trim().isNotEmpty != true) {
         return emit(
-          const HomeState(status: HomeStateStatus.loaded),
+          state.copyWith(status: HomeStateStatus.loaded, searchedBooks: []),
         );
       }
       emit(state.copyWith(status: HomeStateStatus.searching));
