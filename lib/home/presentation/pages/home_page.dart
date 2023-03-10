@@ -1,9 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:intl/intl.dart';
+import 'package:storyways/di/injector.dart';
 
 import 'package:storyways/home/data/datasources/home_remote_datasource.dart';
 import 'package:storyways/home/data/models/book.dart';
@@ -11,15 +9,17 @@ import 'package:storyways/home/data/respository/home_repository.dart';
 import 'package:storyways/home/presentation/pages/home_bloc/home_bloc.dart';
 import 'package:storyways/style/app_colors.dart';
 
+import 'package:storyways/home/presentation/widgets/continue_book_item.dart';
+import 'package:storyways/home/presentation/widgets/new_book_item.dart';
+
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          HomeBloc(HomeRepositoryImpl(MockHomeRemoteDataSourceImpl()))
-            ..add(const HomeEvent(status: HomeEventStatus.initial)),
+      create: (context) => Injector().homeBloc
+        ..add(const HomeEvent(status: HomeEventStatus.initial)),
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -89,9 +89,10 @@ class HomePage extends StatelessWidget {
             const Text(
               'Continue',
               style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryColor),
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryColor,
+              ),
             ),
             const SizedBox(height: 8.0),
             if (!continueBooksIsEmpty) _buildContinueBooks(continueBooks!),
@@ -118,7 +119,7 @@ class HomePage extends StatelessWidget {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: list.length,
-        itemBuilder: (_, index) => _ContinueBookItem(book: list[index]),
+        itemBuilder: (_, index) => ContinueBookItem(book: list[index]),
       ),
     );
   }
@@ -129,147 +130,8 @@ class HomePage extends StatelessWidget {
       shrinkWrap: true,
       itemCount: list.length,
       separatorBuilder: (_, index) => const Divider(thickness: 2.0),
-      itemBuilder: (_, index) => _NewBookItem(book: list[index]),
+      itemBuilder: (_, index) => NewBookItem(book: list[index]),
     );
-  }
-}
-
-class _ContinueBookItem extends StatelessWidget {
-  const _ContinueBookItem({
-    super.key,
-    required this.book,
-  });
-
-  final Book book;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: InkWell(
-        child: SizedBox(
-          width: 100,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (book.coverImage?.isNotEmpty == true)
-                AspectRatio(
-                  aspectRatio: 1,
-                  child: Stack(
-                    children: [
-                      ClipOval(
-                        child: CachedNetworkImage(imageUrl: book.coverImage!),
-                      ),
-                      _buildPlayIcon(),
-                    ],
-                  ),
-                ),
-              Text(
-                book.name,
-                style: Theme.of(context).textTheme.headline2,
-              ),
-              Text(
-                book.author,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText2!
-                    .copyWith(color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-        onTap: () => print('ContinueBookItem'),
-      ),
-    );
-  }
-
-  Widget _buildPlayIcon() {
-    return Positioned(
-      bottom: 0,
-      right: 0,
-      child: SvgPicture.asset('lib/images/play_icon.svg'),
-    );
-  }
-}
-
-class _NewBookItem extends StatelessWidget {
-  const _NewBookItem({
-    super.key,
-    required this.book,
-    this.hideNotificationIcon = false,
-  });
-
-  final Book book;
-  final bool hideNotificationIcon;
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => print('NewBookItem'),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: SizedBox(
-          width: 100,
-          child: Row(
-            children: [
-              if (book.coverImage?.isNotEmpty == true) _buildBookCoverImage(),
-              const SizedBox(width: 12.0),
-              Expanded(child: _buildBookInfo(context)),
-              const SizedBox(width: 12.0),
-              if (!hideNotificationIcon) _buildNotificationIcon(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBookCoverImage() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(15.0),
-      child: Image.network(
-        book.coverImage!,
-        width: 75,
-        height: 100,
-        fit: BoxFit.cover,
-      ),
-    );
-  }
-
-  Widget _buildBookInfo(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          book.name,
-          style: Theme.of(context).textTheme.headline2,
-        ),
-        Text(
-          book.author,
-          style: Theme.of(context)
-              .textTheme
-              .bodyText2!
-              .copyWith(color: Colors.grey),
-        ),
-        const SizedBox(height: 8.0),
-        if (book.publishedDate != null) _buildPublishedDate()
-      ],
-    );
-  }
-
-  Widget _buildPublishedDate() {
-    final formattedDate = DateFormat('dd MMM yyyy').format(book.publishedDate!);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SvgPicture.asset('lib/images/calendar_icon.svg'),
-        const SizedBox(width: 4.0),
-        Text(formattedDate),
-      ],
-    );
-  }
-
-  Widget _buildNotificationIcon() {
-    return SvgPicture.asset('lib/images/notification_icon.svg');
   }
 }
 
@@ -371,7 +233,7 @@ class _SearchAppBarState extends State<_SearchAppBar> {
             padding: const EdgeInsets.all(16.0),
             separatorBuilder: (_, index) => const Divider(thickness: 2.0),
             itemBuilder: (_, index) =>
-                _NewBookItem(book: books[index], hideNotificationIcon: true),
+                NewBookItem(book: books[index], hideNotificationIcon: true),
           );
         }
         return const SizedBox();
